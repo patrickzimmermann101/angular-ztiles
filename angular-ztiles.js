@@ -1,4 +1,4 @@
-/*! angular-ztiles (v0.1.0) - Copyright: 2014, Patrick Zimmermann (patrick@knowhere.guru) - MIT */
+/*! angular-ztiles (v0.1.1) - Copyright: 2014, Patrick Zimmermann (patrick@knowhere.guru) - MIT */
 /*
  * angular-ztiles
  *
@@ -15,8 +15,8 @@
 
 'use strict';
 
-angular.module('pz101.angular-ztiles', []);
-angular.module('pz101.angular-ztiles')
+angular.module('pz101.ztiles', []);
+angular.module('pz101.ztiles')
   .directive('zTiles', function ($compile) {
     
     // Input Objects

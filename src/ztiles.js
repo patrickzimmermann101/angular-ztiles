@@ -14,8 +14,8 @@
 
 'use strict';
 
-angular.module('pz101.angular-ztiles', []);
-angular.module('pz101.angular-ztiles')
+angular.module('pz101.ztiles', []);
+angular.module('pz101.ztiles')
   .directive('zTiles', function ($compile) {
     
     // Input Objects

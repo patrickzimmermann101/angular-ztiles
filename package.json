@@ -1,0 +1,20 @@
+{
+  "name": "angular-ztiles",
+  "version": "0.1.0",
+  "author": "Patrick Zimmermann (patrick@knowhere.guru)",
+  "description": "A self adaptive grid for tiles in AngularJS like www.yahoo.com/food.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:patrickzimmermann101/angular-ztiles.git"
+  },
+  "devDependencies": {
+    "grunt-contrib-uglify": "~0.2.2",
+    "grunt-contrib-jshint": "~0.7.1",
+    "grunt": "~0.4.1"
+,   "grunt-contrib-concat": "~0.3.0"
+  },
+  "scripts": {
+    "test": "grunt test"
+  }
+}

@@ -1,7 +1,7 @@
 angular-ztiles
 ==============
 
-Self adaptive tiles in AngularJS like to see at www.yahoo.com/food.
+Self adaptive tiles in AngularJS like www.yahoo.com/food.
 
 ## Installation
 

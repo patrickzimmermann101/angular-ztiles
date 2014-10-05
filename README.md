@@ -6,6 +6,7 @@ Self adaptive tiles in AngularJS like www.yahoo.com/food.
 Demo: http://patrickzimmermann101.github.io/angular-ztiles
 
 Demo Screenshot:
+
 ![Demo Screenshot](https://raw.github.com/patrickzimmermann101/angular-ztiles/master/demo.jpg)
 
 ## Installation

@@ -23,7 +23,10 @@ module.exports = function (grunt) {
             options: {
                 preserveComments: 'some',
                 report: 'gzip',
-                mangle: false
+                mangle: false,
+                compress: {
+                     drop_console: true 
+                }
             },
             dist: {
                 src: '<%= pkg.name %>.js',

@@ -22,7 +22,8 @@ module.exports = function (grunt) {
         uglify: {
             options: {
                 preserveComments: 'some',
-                report: 'gzip'
+                report: 'gzip',
+                mangle: false
             },
             dist: {
                 src: '<%= pkg.name %>.js',

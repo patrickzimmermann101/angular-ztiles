@@ -20,30 +20,31 @@ angular.module('pz101.ztiles')
   .directive('zTiles', function ($compile) {
     
     // Input Objects
-    // [{width: 100px, height: 100px, ...}, {width: 200px, height : 200px, ...}, ...]
+    // [{width: 100, height: 100, ...}, {width: 200, height : 200, ...}, ...]
 
-    var cardsCount = 0;
+    var tilesCount = 0;
     var rows = [];
     var templateCache = null;
     var padding = 4;
     var widthKey = 'width';
     var heightKey = 'height';
     var transcludeTemplate = '';
-    var maxCards = 5;
+    var maxTiles = 5;
 
     function link(scope,elem) {
 
-        // get ratio of card
-        function ratio(card) {
-            return card[widthKey] / card[heightKey];
+        // get ratio of tile
+        function ratio(tile) {
+            return tile[widthKey] / tile[heightKey];
         }
 
         function renderCSS() {
 
             var width = elem.width()-1;
             var p = padding;
+            console.log(rows);
 
-            elem.find('.z-grid').css('padding', '0px').css('margin','0px');
+            elem.find('.z-tile').css('padding', '0px').css('margin','0px');
 
             for (var r = 0; r < rows.length; r++) {
               
@@ -59,11 +60,11 @@ angular.module('pz101.ztiles')
                 var wc = c*hc;
                 //var wab = qa+ra*ha;
            
-                var elems = elem.find('.z-grid-row-'+ r);
+                var elems = elem.find('.z-tiles-row-'+ r);
           
                 for (var n=0;n<elems.length;n++) {
                     var $e = angular.element(elems[n]);
-                    var type = $e.attr('grid-type');
+                    var type = $e.attr('tile-type');
                     
                     // 2 Row Element
                     if (type === 'c') {
@@ -72,16 +73,16 @@ angular.module('pz101.ztiles')
                     // 1. Row
                     } else if (type === 'a') {
               
-                        var indexA = (row.offset + row.pa[$e.attr('grid-col')]);
-                        var cardA = scope.cards[indexA];
-                        $e.css('height', ha+'px').css('width', ratio(cardA)*ha+'px').css('margin-'+row.float, p+'px');
+                        var indexA = (row.offset + row.pa[$e.attr('tiles-col')]);
+                        var tileA = scope.tiles[indexA];
+                        $e.css('height', ha+'px').css('width', ratio(tileA)*ha+'px').css('margin-'+row.float, p+'px');
                      
                     // 2. Row
                     } else if (type === 'b') {
 
-                        var indexB = (row.offset + row.pb[$e.attr('grid-col')]);
-                        var cardB = scope.cards[indexB];
-                        $e.css('width', ratio(cardB)*hb+'px').css('margin-top', p+'px').css('margin-bottom', p+'px')
+                        var indexB = (row.offset + row.pb[$e.attr('tiles-col')]);
+                        var tileB = scope.tiles[indexB];
+                        $e.css('width', ratio(tileB)*hb+'px').css('margin-top', p+'px').css('margin-bottom', p+'px')
                           .css('height', hb+'px').css('margin-'+row.float, p+'px');
                     }
                 }
@@ -94,60 +95,61 @@ angular.module('pz101.ztiles')
       
         }
     
-        function createRow(cardSet, row, num, parent) {
+        function createRow(tileSet, row, num, parent) {
 
-            createDOM('c', num, 0, cardSet[row.pc], parent);
+            createDOM('c', num, 0, tileSet[row.pc], parent);
           
             for (var a = 0; a<row.na;a++) {
-                createDOM('a', num, a, cardSet[parseInt(row.pa[a],10)], parent);
+                createDOM('a', num, a, tileSet[parseInt(row.pa[a],10)], parent);
             }
 
             for (var b = 0; b<row.nb;b++) {
-                createDOM('b', num, b, cardSet[parseInt(row.pb[b],10)], parent);
+                createDOM('b', num, b, tileSet[parseInt(row.pb[b],10)], parent);
             }
                 
-            parent.append('<div class="z-grid-clear" style="clear:both" />');
+            parent.append('<div class="z-tiles-clear" style="clear:both" />');
         }
      
-        function createDOM(type, row, col, card, parent) {
+        function createDOM(type, row, col, tile, parent) {
         
-            var outterdiv = '<div class="z-grid z-grid-row-'+
-                row+'" grid-col="'+
-                col+'" grid-type="'+
+            var outterdiv = '<div class="z-tile z-tiles-row-'+
+                row+'" tiles-col="'+
+                col+'" tile-type="'+
                 type+'" style="float:'+
                 rows[row].float+'">'+
                 transcludeTemplate+'</div>';
             
             // create isolated scope for card. Parent Scope is available via "mother"
             var isolatedScope = scope.$new(true);
-            isolatedScope.card = card;
+            isolatedScope.tile = tile;
             isolatedScope.mother = scope.$parent;
 
             var content = $compile(outterdiv)(isolatedScope);
             parent.append(content);
         }
 
-        function createGrid(parent, cardSet, offset) {
+        function createGrid(parent, tileSet, offset) {
             // TODO for count 1 and 2
-
-            if (cardSet.length >= 3) {
+            if (tileSet.length < 3) {
+                console.log('Not implemented yet!');
+            } else if (tileSet.length >= 3) {
 
                 var lowestRatio = 0;
                 
-                for (var n = 0;n<cardSet.length;n++) {
-                    if (ratio(cardSet[n]) < ratio(cardSet[lowestRatio])) {
+                for (var n = 0;n<tileSet.length;n++) {
+                    if (ratio(tileSet[n]) < ratio(tileSet[lowestRatio])) {
                         lowestRatio = n;
                     }
                 }
 
-                var c = ratio(cardSet[lowestRatio]);
+                var c = ratio(tileSet[lowestRatio]);
                 var pc = lowestRatio;
                 var pa = [];
                 var pb = [];
 
                 var lastTime = null;
 
-                for (var i = 0;i<cardSet.length;i++) {
+                for (var i = 0;i<tileSet.length;i++) {
                     if (i !== pc) {
 
                         if (lastTime === null) {
@@ -165,11 +167,11 @@ angular.module('pz101.ztiles')
                 }
                 var ra = 0;
                 for (var k = 0; k < pa.length; k++) {
-                    ra += ratio(cardSet[pa[k]]);
+                    ra += ratio(tileSet[pa[k]]);
                 }
                 var rb = 0;
                 for (var l = 0; l < pb.length; l++) {
-                    rb += ratio(cardSet[pb[l]]);
+                    rb += ratio(tileSet[pb[l]]);
                 }
 
                 var row = {
@@ -188,7 +190,7 @@ angular.module('pz101.ztiles')
                 rows.push(row);
 
                 // create DOMs for row
-                createRow(cardSet, row, rows.length-1, parent);
+                createRow(tileSet, row, rows.length-1, parent);
             }
         }
 
@@ -199,11 +201,11 @@ angular.module('pz101.ztiles')
         if (scope.heightKey) {
             heightKey = scope.heightKey;
         }
-        if (scope.cardPadding) {
-            padding = parseInt(scope.cardPadding);
+        if (scope.tilesPadding) {
+            padding = parseInt(scope.tilesPadding);
         }
-        if (scope.maxCards) {
-            maxCards = parseInt(scope.maxCards);
+        if (scope.maxTiles) {
+            maxTiles = parseInt(scope.maxTiles);
         }
         // get transclude template
         if (elem.html()) {
@@ -230,30 +232,29 @@ angular.module('pz101.ztiles')
             renderCSS();
         });
 
-        if (scope.cards) {
-            cardsCount = scope.cards.length;
+        if (scope.tiles && templateCache !== null) {
+            tilesCount = scope.tiles.length;
         }
 
         // watch for changes in cards. Only appending is supported now.
-        scope.$watch('cards', function() {
-       
+        scope.$watch('tiles', function() {
+           
             // add new cards and create DOMs
-            if (scope.cards) {
-                if (cardsCount !== scope.cards.length) {
-                
-                    var done = cardsCount;
-                    cardsCount = scope.cards.length;
+            if (scope.tiles) {
+                if (tilesCount !== scope.tiles.length) {
+                    var done = tilesCount;
+                    tilesCount = scope.tiles.length;
                     
-                    while (done < cardsCount) {
+                    while (done < tilesCount) {
                         // max cards 
-                        var max = Math.min(maxCards+1, cardsCount - done);
+                        var max = Math.min(maxTiles+1, tilesCount - done);
                         // standard value is set to 3
                         var r = Math.min(max, 3);
                         if (max > 3) {
                             r = Math.floor((Math.random() * (max-3)) + 3);
                         }
                        
-                        createGrid(elem, scope.cards.slice(done, done+r), done);
+                        createGrid(elem, scope.tiles.slice(done, done+r), done);
                         done+=r;
                     }
 
@@ -267,11 +268,11 @@ angular.module('pz101.ztiles')
     return {
         restrict: 'A',
         scope: {
-            cards : '=cards',
+            tiles : '=tiles',
             widthKey : '@',
             heightKey : '@',
-            cardPadding : '@',
-            maxCards : '@'
+            tilesPadding : '@',
+            maxTiles : '@'
         },
         link : link
     };

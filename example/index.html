@@ -1,0 +1,25 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+       "http://www.w3.org/TR/html4/loose.dtd">
+<html ng-app="demoApp">
+<head>
+<title>Angular Z-Tiles Demo</title>
+	<script src='../bower_components/jquery/dist/jquery.min.js'></script>
+	<script src="../bower_components/angular/angular.min.js"></script>
+	<script src="demo.js"></script>
+</head>
+<body ng-controller="DemoCtrl">
+	<div z-tiles tiles="tiles">
+		<div style="position:relative" fadeing>
+			<img ng-src="{{tile.link}}" style="width:100%;height:100%"></img>
+			<div class="fadeing" style="display:none;position:absolute;top:0px;left:0px;right:0px;background-color:gray;opacity:0.9;border-width:1px;border-style:solid;border-color:white">  
+            	<p style="padding:10px;margin:0px;color:white;opacity:1;font-weight:bold;text-align:center">Views {{tile.views}} - Score {{tile.score}}</p>
+        	</div>
+        	<div class="fadeing" style="display:none;position:absolute;bottom:0px;left:0px;right:0px;background-color:gray;opacity:0.9;border-width:1px;border-style:solid;border-color:white">  
+            	<p style="padding:10px;margin:0px;color:white;opacity:1;font-weight:bold;text-align:center">{{tile.title}}</p>
+        	</div>
+        </div>
+	</div>
+
+	 <script src="../angular-ztiles.js"></script>
+</body>
+</html>

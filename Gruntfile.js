@@ -25,7 +25,7 @@ module.exports = function (grunt) {
                 report: 'gzip',
                 mangle: false,
                 compress: {
-                     drop_console: true 
+                     drop_console: true
                 }
             },
             dist: {
@@ -47,7 +47,6 @@ module.exports = function (grunt) {
                 jshintrc: '.jshintrc'
             },
             all: [
-                'Gruntfile.js',
                 'src/*.js',
                 'example/*.js'
             ]

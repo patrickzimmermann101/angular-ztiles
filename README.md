@@ -3,6 +3,8 @@ angular-ztiles
 
 Self adaptive tiles in AngularJS like www.yahoo.com/food.
 
+Demo: http://patrickzimmermann101.github.io/angular-ztiles
+
 ## Installation
 
 1. `bower install --save angular-ztiles`

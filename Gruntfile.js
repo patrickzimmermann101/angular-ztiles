@@ -44,12 +44,23 @@ module.exports = function (grunt) {
         },
         jshint: {
             options: {
-                jshintrc: '.jshintrc'
+                jshintrc: '.jshintrc',
+                reporter: require('jshint-stylish')
             },
             all: [
                 'src/*.js',
                 'example/*.js'
             ]
+        },
+        jscs: {
+            src: [
+                'src/*.js',
+                'example/*.js'
+            ],
+            options: {
+                config: '.jscsrc',
+                reporter: require( 'jscs-stylish' ).path
+            }
         },
         ngmin: {
             dist: {
@@ -62,6 +73,8 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-contrib-jshint');
-    grunt.registerTask('test', ['jshint']);
+    grunt.loadNpmTasks("grunt-jscs");
+    
+    grunt.registerTask('test', ['jshint', 'jscs']);
     grunt.registerTask('default', ['test', 'concat', 'uglify']);
 };

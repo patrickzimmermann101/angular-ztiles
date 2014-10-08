@@ -9,10 +9,13 @@
     "url": "git@github.com:patrickzimmermann101/angular-ztiles.git"
   },
   "devDependencies": {
+    "grunt": "~0.4.1",
+    "grunt-contrib-concat": "~0.3.0",
+    "grunt-contrib-jshint": "0.10.0",
     "grunt-contrib-uglify": "~0.2.2",
-    "grunt-contrib-jshint": "~0.7.1",
-    "grunt": "~0.4.1"
-,   "grunt-contrib-concat": "~0.3.0"
+    "grunt-jscs": "^0.7.1",
+    "jscs-stylish": "^0.3.0",
+    "jshint-stylish": "^1.0.0"
   },
   "scripts": {
     "test": "grunt test"

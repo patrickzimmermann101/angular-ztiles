@@ -64,6 +64,7 @@ Example for a controller class
 		body: 'Hello Tile C'}];
 	...
 	```
+
 4. You can now access to all data of an element in your array inside your tile definition.
 
 	```html
@@ -80,7 +81,8 @@ Example for a controller class
 	    <button ng-click="mother.click(tile)">Click</button>
     </div>
    ```
-```js
+
+	```js
 	...
 	$scope.click = function(tile) {
 		console.log('Clicked Button: ' + tile.body);

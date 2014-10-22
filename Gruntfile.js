@@ -14,7 +14,7 @@
 'use strict';
 
 module.exports = function(grunt) {
-  
+
   require('load-grunt-tasks')(grunt);
 
   var banner = '/*! <%= pkg.name %> (v<%= pkg.version %>) - ' +
@@ -29,7 +29,7 @@ module.exports = function(grunt) {
         mangle: false,
         compress: {
           drop_console: true,
-          angular : true
+          angular: true
         }
       },
       dist: {
@@ -53,15 +53,19 @@ module.exports = function(grunt) {
       },
       all: [
         //'Gruntfile.js',
+        'karma.config.js',
         'src/*.js',
-        'example/*.js'
+        'example/*.js',
+        'specs/*.js'
       ]
     },
     jscs: {
       src: [
         //'Gruntfile.js',
+        'karma.config.js',
         'src/*.js',
-        'example/*.js'
+        'example/*.js',
+        'specs/*.js'
       ],
       options: {
         config: '.jscsrc',
@@ -73,9 +77,20 @@ module.exports = function(grunt) {
         src: '<%= pkg.name %>.js',
         dest: '<%= pkg.name %>.js'
       }
+    },
+    karma: {
+      dist: {
+        configFile: 'karma.config.js'
+      },
+      watch: {
+        configFile: 'karma.config.js',
+        singleRun: false,
+        autoWatch: true
+      }
     }
   });
 
-  grunt.registerTask('test', ['jshint', 'jscs']);
+  grunt.registerTask('test', ['jshint', 'jscs', 'karma:dist']);
   grunt.registerTask('default', ['test', 'concat', 'uglify']);
+  grunt.registerTask('testing', ['jshint', 'jscs', 'karma:watch']);
 };

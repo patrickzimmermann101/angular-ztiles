@@ -59,6 +59,11 @@
 
   // Globals: Angular
   "globals": {
-    "angular": false
+    "angular": false,
+    "expect": false,
+    "it": false,
+    "inject": false,
+    "describe": false,
+    "beforeEach": false
   }
 }

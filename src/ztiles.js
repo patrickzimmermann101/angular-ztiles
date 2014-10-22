@@ -13,35 +13,50 @@
 
 'use strict';
 
-angular.module('pz101.ztiles', []);
-angular.module('pz101.ztiles')
-  .directive('zTiles', function($compile) {
-
-    // Input Objects
-    // [{width: 100, height: 100, ...}, {width: 200, height : 200, ...}, ...]
+angular.module('pz101.ztiles', []).
+  directive('zTiles', function($compile) {
 
     var tilesCount = 0,
-        rows = [],
+      rows = [],
         templateCache = null,
-        padding = 4,
-        widthKey = 'width',
-        heightKey = 'height',
         transcludeTemplate = '',
-        maxTiles = 5;
+        maxTiles = 5,
+        alignOffset = 0,
+        countsOffset = 0,
+        options = {
+          padding: 4,
+          heightKey: 'height',
+          widthKey: 'width',
+          alignment: 'lr',
+          counts: [3]
+        };
 
     function link(scope, elem) {
 
       var $window;
 
-      // get ratio of tile
-      function ratio(tile) {
-        return tile[widthKey] / tile[heightKey];
+      // get current created tiles
+      function tileCount() {
+        var i,
+          num = 0;
+
+        for (i = 0;i < rows.length; i++) {
+          num += rows[i].na + rows[i].nb + 1;
+        }
+
+        return num;
       }
 
+      // get ratio of tile
+      function ratio(tile) {
+        return tile[options.widthKey] / tile[options.heightKey];
+      }
+
+      // update all css values
       function renderCSS() {
 
         var width = elem.width() - 1,
-          p = padding,
+          p = options.padding,
           r = 0,
           row,
           qa,
@@ -62,57 +77,87 @@ angular.module('pz101.ztiles')
           indexB,
           tileB;
 
-        console.log(rows);
-
         elem.find('.z-tile').css('padding', '0px').css('margin', '0px');
 
         for (r = 0; r < rows.length; r++) {
 
-          row = rows[r];
-          qa = (row.na - 1) * p;
-          qb = (row.nb - 1) * p;
-          c = row.c;
-          ra = row.ra;
-          rb = row.rb;
-          hc = (qb - qa + ra * p + (rb + ra) * ((p + qa - width) / ra - p)) /
-            (-rb - (rb / ra * c) - c);
-          hb = (p + qa - width) / ra - p + (1 + c / ra) * hc;
-          ha = -p + hc - hb;
-          wc = c * hc;
-          //var wab = qa+ra*ha;
-          elems = elem.find('.z-tiles-row-' + r);
-
-          for (n = 0;n < elems.length;n++) {
-            $e = angular.element(elems[n]);
-            type = $e.attr('tile-type');
-
-            // 2 Row Element
-            if (type === 'c') {
-              $e.css('height', hc + 'px').css('width', wc + 'px').
+          if (rows[r].na === 0 && rows[r].nb === 0) {
+            // 1 element in row:
+            elems = elem.find('.z-tiles-row-' + r);
+            for (n = 0;n < elems.length;n++) {
+              hc = (width + 1) / rows[r].c;
+              $e = angular.element(elems[n]);
+              $e.css('height', hc + 'px').css('width', (width + 1) + 'px').
                 css('margin-bottom', p + 'px');
+            }
+          } else if (rows[r].na === 1 && rows[r].nb === 0) {
+            // 2 elements in row:
+            hc = (width - options.padding) / (rows[r].c + rows[r].ra);
+            wc = (hc * rows[r].c);
 
-            // 1. Row
-            } else if (type === 'a') {
+            elems = elem.find('.z-tiles-row-' + r);
+            for (n = 0;n < elems.length;n++) {
+              $e = angular.element(elems[n]);
+              type = $e.attr('tile-type');
 
-              indexA = (row.offset +
-                row.pa[$e.attr('tiles-col')]);
-              tileA = scope.tiles[indexA];
-              $e.css('height', ha + 'px').
-                css('width', ratio(tileA) * ha + 'px').
-                css('margin-' + row.float, p + 'px');
+              if (type === 'c') {
+                $e.css('height', hc + 'px').css('width', wc + 'px').
+                  css('margin-bottom', p + 'px');
 
-            // 2. Row
-            } else if (type === 'b') {
+              } else if (type === 'a') {
+                $e.css('height', hc + 'px').css('width', rows[r].ra *
+                  hc + 'px').css('margin-bottom', p + 'px').
+                  css('margin-' + rows[r].float, p + 'px');
+              }
+            }
+          } else {
+            // 3 and more elements in row
+            row = rows[r];
+            qa = (row.na - 1) * p;
+            qb = (row.nb - 1) * p;
+            c = row.c;
+            ra = row.ra;
+            rb = row.rb;
+            hc = (qb - qa + ra * p + (rb + ra) *
+              ((p + qa - width) / ra - p)) / (-rb - (rb / ra * c) - c);
+            hb = (p + qa - width) / ra - p + (1 + c / ra) * hc;
+            ha = -p + hc - hb;
+            wc = c * hc;
+            //var wab = qa+ra*ha;
+            elems = elem.find('.z-tiles-row-' + r);
 
-              indexB = (row.offset +
-                row.pb[$e.attr('tiles-col')]);
-              tileB = scope.tiles[indexB];
-              $e.
-                css('width', ratio(tileB) * hb + 'px').
-                css('margin-top', p + 'px').
-                css('margin-bottom', p + 'px').
-                css('height', hb + 'px').
-                css('margin-' + row.float, p + 'px');
+            for (n = 0;n < elems.length;n++) {
+              $e = angular.element(elems[n]);
+              type = $e.attr('tile-type');
+
+              // 2 Row Element
+              if (type === 'c') {
+                $e.css('height', hc + 'px').css('width', wc + 'px').
+                  css('margin-bottom', p + 'px');
+
+              // 1. Row
+              } else if (type === 'a') {
+
+                indexA = (row.offset +
+                  row.pa[$e.attr('tiles-col')]);
+                tileA = scope.tiles[indexA];
+                $e.css('height', ha + 'px').
+                  css('width', ratio(tileA) * ha + 'px').
+                  css('margin-' + row.float, p + 'px');
+
+              // 2. Row
+              } else if (type === 'b') {
+
+                indexB = (row.offset +
+                  row.pb[$e.attr('tiles-col')]);
+                tileB = scope.tiles[indexB];
+                $e.
+                  css('width', ratio(tileB) * hb + 'px').
+                  css('margin-top', p + 'px').
+                  css('margin-bottom', p + 'px').
+                  css('height', hb + 'px').
+                  css('margin-' + row.float, p + 'px');
+              }
             }
           }
         }
@@ -148,8 +193,7 @@ angular.module('pz101.ztiles')
           type + '" style="float:' +
           rows[row].float + '">' +
           transcludeTemplate + '</div>',
-
-          // create isolated scope for card. Parent Scope
+          // create isolated scope for tile. Parent Scope
           // is available via "mother"
           isolatedScope = scope.$new(true),
           content;
@@ -161,7 +205,7 @@ angular.module('pz101.ztiles')
         parent.append(content);
       }
 
-      function createGrid(parent, tileSet, offset) {
+      function createGrid(parent, tileSet, offset, align) {
         var lowestRatio = 0,
           n,
           c,
@@ -177,8 +221,52 @@ angular.module('pz101.ztiles')
           row;
 
         // TODO for count 1 and 2
-        if (tileSet.length < 3) {
-          console.log('Not implemented yet!');
+        if (tileSet.length === 1) {
+          //console.log('Not implemented yet! 1');
+          c = ratio(tileSet[0]);
+          pa = [];
+          pb = [];
+          ra = 0;
+          rb = 0;
+
+          row = {
+            c: c,
+            ra: ra,
+            rb: rb,
+            na: pa.length,
+            nb: pb.length,
+            pa: pa,
+            pb: pb,
+            pc: 0,
+            offset: offset,
+            float: align
+          };
+
+          rows.push(row);
+
+          // create DOMs for row
+          createRow(tileSet, row, rows.length - 1, parent);
+
+        } else if (tileSet.length === 2) {
+          c = ratio(tileSet[0]);
+          ra = ratio(tileSet[1]);
+          row = {
+            c: c,
+            ra: ra,
+            rb: 0,
+            na: 1,
+            nb: 0,
+            pa: [1],
+            pb: [],
+            pc: 0,
+            offset: offset,
+            float: align
+          };
+
+          rows.push(row);
+
+          createRow(tileSet, row, rows.length - 1, parent);
+
         } else if (tileSet.length >= 3) {
 
           for (n = 0; n < tileSet.length; n++) {
@@ -229,7 +317,7 @@ angular.module('pz101.ztiles')
             pb: pb,
             pc: pc,
             offset: offset,
-            float: 'left'
+            float: align
           };
 
           rows.push(row);
@@ -238,16 +326,22 @@ angular.module('pz101.ztiles')
           createRow(tileSet, row, rows.length - 1, parent);
         }
       }
-
-      // Defaults Values
-      if (scope.widthKey) {
-        widthKey = scope.widthKey;
-      }
-      if (scope.heightKey) {
-        heightKey = scope.heightKey;
-      }
-      if (scope.tilesPadding) {
-        padding = parseInt(scope.tilesPadding);
+      if (scope.options) {
+        if (scope.options.padding) {
+          options.padding = scope.options.padding;
+        }
+        if (scope.options.widthKey) {
+          options.widthKey = scope.options.widthKey;
+        }
+        if (scope.options.heightKey) {
+          options.heightKey = scope.options.heightKey;
+        }
+        if (scope.options.alignment) {
+          options.alignment = scope.options.alignment;
+        }
+        if (scope.options.counts && angular.isArray(scope.options.counts)) {
+          options.counts = scope.options.counts;
+        }
       }
       if (scope.maxTiles) {
         maxTiles = parseInt(scope.maxTiles);
@@ -283,28 +377,55 @@ angular.module('pz101.ztiles')
 
       // watch for changes in cards. Only appending is supported now.
       scope.$watch('tiles', function() {
-
         var done,
           max,
-          r;
+          r,
+          rowCount = 0,
+          align;
 
         // add new cards and create DOMs
         if (scope.tiles) {
-          if (tilesCount !== scope.tiles.length) {
-            done = tilesCount;
+          if (tileCount() !== scope.tiles.length) {
+            done = tileCount();
             tilesCount = scope.tiles.length;
 
             while (done < tilesCount) {
               // max cards
-              max = Math.min(maxTiles + 1, tilesCount - done);
+              max = Math.min(maxTiles, tilesCount - done);
               // standard value is set to 3
-              r = Math.min(max, 3);
-              if (max > 3) {
-                r = Math.floor((Math.random() * (max - 3)) + 3);
+              //r = Math.min(max, 3);
+              //if (max > 3) {
+              //  r = Math.floor((Math.random() * (max - 3)) + 3);
+              //}
+
+              // Default Counts [3]: 3, 3, 3, 3...
+              if (countsOffset >= options.counts.length) {
+                countsOffset = 0;
               }
 
-              createGrid(elem, scope.tiles.slice(done, done + r), done);
+              r = Math.min(max, options.counts[countsOffset]);
+
+              // Default Alignments 'lr': left, right, left, right...
+              if (alignOffset >= options.alignment.length) {
+                alignOffset = 0;
+              }
+              if (options.alignment[alignOffset] === 'l') {
+                align = 'left';
+              } else if (options.alignment[alignOffset] === 'r') {
+                align = 'right';
+              } else {
+                if (Math.random() >= 0.5) {
+                  align = 'right';
+                } else {
+                  align = 'left';
+                }
+              }
+              alignOffset++;
+              countsOffset++;
+
+              createGrid(elem, scope.tiles.slice(done, done + r), done, align);
               done += r;
+              rowCount++;
             }
 
             // recalculate styles
@@ -317,11 +438,9 @@ angular.module('pz101.ztiles')
     return {
       restrict: 'A',
       scope: {
-        tiles: '=tiles',
-        widthKey: '@',
-        heightKey: '@',
-        tilesPadding: '@',
-        maxTiles: '@'
+        tiles: '=',
+        maxTiles: '@',
+        options: '=?'
       },
       link: link
     };

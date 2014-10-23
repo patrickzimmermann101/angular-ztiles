@@ -1,4 +1,4 @@
-/*! angular-ztiles (v0.1.1) - Copyright: 2014, Patrick Zimmermann (patrick@knowhere.guru) - MIT */
+/*! angular-ztiles (v0.2.0) - Copyright: 2014, Patrick Zimmermann (patrick@knowhere.guru) - MIT */
 /*
  * angular-ztiles
  *

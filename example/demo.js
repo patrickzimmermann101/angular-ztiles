@@ -24,10 +24,8 @@ angular.module('demoApp', ['pz101.ztiles']).controller('DemoCtrl',
 
           $scope.tiles = data.items.filter(function(entry) {
             i++;
-            return angular.isDefined(entry.width) && i < 10;
+            return angular.isDefined(entry.width) && i < 30;
           });
-
-          $scope.tiles2 = angular.copy($scope.tiles);
 
         }).error(function(e) {
           console.log(e);
@@ -37,8 +35,29 @@ angular.module('demoApp', ['pz101.ztiles']).controller('DemoCtrl',
     return {
       restrict: 'A',
       link: function(scope, element) {
+
+        // Cut down to one single line
+        scope.$evalAsync(function() {
+          var title = element.find('p').append('<span>A</span>'),
+            oneline = 0,
+            titleText;
+
+          element.find('.fadeing').show();
+          oneline = element.find('span').height();
+          element.find('span').empty();
+
+          while (title.height() > oneline) {
+
+            titleText = element.find('p').text();
+            element.find('p').text(titleText.substring(0,
+              titleText.length - 5) + ' ...');
+          }
+          element.find('.fadeing').hide();
+
+        });
+
         element.bind('mouseenter', function() {
-          element.find('.fadeing').fadeIn('slow');
+          element.find('.fadeing').show();
         });
         element.bind('mouseleave', function() {
           element.find('.fadeing').hide();
@@ -46,49 +65,4 @@ angular.module('demoApp', ['pz101.ztiles']).controller('DemoCtrl',
       }
     };
   }
-).directive('title', function() {
-  var minHeight = 0,
-    helper, it = 0;
-
-  return {
-    restrict: 'A',
-    link: function(scope, element) {
-      it++;
-      console.log(it);
-      if (minHeight === 0) {
-        helper = angular.element('<span class=".helper">A</span>');
-        /*scope.$watch(
-          function() {return helper.height();},
-          function() {
-            //console.log(helper.height());
-            if (minHeight === 0 && helper.height() > 0) {
-              minHeight = helper.height();
-              //console.log(helper.height());
-            }
-          }
-        );*/
-
-        element.find('p').append(helper);
-        //console.log(element.find('.helper').height());
-      }
-
-      /*function rerender() {
-        var h = element.height();
-
-        if (angular.isDefined(scope.minHeight) && h > scope.minHeight) {
-          console.log(element.find('p').text('test'));
-        }
-      }
-      scope.$watch('minHeight',
-        function() {
-          rerender();
-        });
-      scope.$watch(
-        function() {return element.height();},
-        function() {
-          rerender();
-        }
-      );*/
-    }
-  };
-});
+);

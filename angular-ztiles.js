@@ -14,27 +14,27 @@
 
 'use strict';
 
-angular.module('pz101.ztiles', []);
-angular.module('pz101.ztiles')
-  .directive('zTiles', function($compile) {
+angular.module('pz101.ztiles', []).
+  controller('zTilesController', ['$scope', function($scope) {
 
-    var tilesCount = 0,
-      rows = [],
-        templateCache = null,
-        transcludeTemplate = '',
-        maxTiles = 5,
-        alignOffset = 0,
-        countsOffset = 0,
-        options = {
-          padding: 4,
-          heightKey: 'height',
-          widthKey: 'width',
-          alignment: 'lr',
-          counts: [3]
-        };
+    // initialize scope variables
+    $scope.rows = [];
+    $scope.tilesCount = 0;
+    $scope.alignOffset = 0;
+    $scope.countsOffset = 0;
+    $scope.templateCache = null;
+    $scope.transcludeTemplate = '';
+    $scope.defaultOptions = {
+      padding: 4,
+      heightKey: 'height',
+      widthKey: 'width',
+      alignment: 'lr',
+      counts: [3]
+    };
+  }]).
+  directive('zTiles', function($compile) {
 
     function link(scope, elem) {
-
       var $window;
 
       // get current created tiles
@@ -42,8 +42,8 @@ angular.module('pz101.ztiles')
         var i,
           num = 0;
 
-        for (i = 0;i < rows.length; i++) {
-          num += rows[i].na + rows[i].nb + 1;
+        for (i = 0;i < scope.rows.length; i++) {
+          num += scope.rows[i].na + scope.rows[i].nb + 1;
         }
 
         return num;
@@ -51,51 +51,36 @@ angular.module('pz101.ztiles')
 
       // get ratio of tile
       function ratio(tile) {
-        return tile[options.widthKey] / tile[options.heightKey];
+        return tile[scope.defaultOptions.widthKey] /
+          tile[scope.defaultOptions.heightKey];
       }
 
       // update all css values
       function renderCSS() {
 
         var width = elem.width() - 1,
-          p = options.padding,
-          r = 0,
-          row,
-          qa,
-          qb,
-          c,
-          ra,
-          rb,
-          hc,
-          hb,
-          ha,
-          wc,
-          elems,
-          n,
-          $e,
-          type,
-          indexA,
-          tileA,
-          indexB,
-          tileB;
+          p = scope.defaultOptions.padding,
+          r = 0, row, qa, qb, c, ra, rb, hc, hb, ha, wc, elems, n, $e,
+          type, indexA, tileA, indexB, tileB;
 
         elem.find('.z-tile').css('padding', '0px').css('margin', '0px');
 
-        for (r = 0; r < rows.length; r++) {
+        for (r = 0; r < scope.rows.length; r++) {
 
-          if (rows[r].na === 0 && rows[r].nb === 0) {
+          if (scope.rows[r].na === 0 && scope.rows[r].nb === 0) {
             // 1 element in row:
             elems = elem.find('.z-tiles-row-' + r);
             for (n = 0;n < elems.length;n++) {
-              hc = (width + 1) / rows[r].c;
+              hc = (width + 1) / scope.rows[r].c;
               $e = angular.element(elems[n]);
               $e.css('height', hc + 'px').css('width', (width + 1) + 'px').
                 css('margin-bottom', p + 'px');
             }
-          } else if (rows[r].na === 1 && rows[r].nb === 0) {
+          } else if (scope.rows[r].na === 1 && scope.rows[r].nb === 0) {
             // 2 elements in row:
-            hc = (width - options.padding) / (rows[r].c + rows[r].ra);
-            wc = (hc * rows[r].c);
+            hc = (width - scope.defaultOptions.padding) / (scope.rows[r].c +
+              scope.rows[r].ra);
+            wc = (hc * scope.rows[r].c);
 
             elems = elem.find('.z-tiles-row-' + r);
             for (n = 0;n < elems.length;n++) {
@@ -107,14 +92,14 @@ angular.module('pz101.ztiles')
                   css('margin-bottom', p + 'px');
 
               } else if (type === 'a') {
-                $e.css('height', hc + 'px').css('width', rows[r].ra *
+                $e.css('height', hc + 'px').css('width', scope.rows[r].ra *
                   hc + 'px').css('margin-bottom', p + 'px').
-                  css('margin-' + rows[r].float, p + 'px');
+                  css('margin-' + scope.rows[r].float, p + 'px');
               }
             }
           } else {
             // 3 and more elements in row
-            row = rows[r];
+            row = scope.rows[r];
             qa = (row.na - 1) * p;
             qb = (row.nb - 1) * p;
             c = row.c;
@@ -164,9 +149,9 @@ angular.module('pz101.ztiles')
           }
         }
 
-        // Wait for compiling
+        // Wait for compiling and linking
         scope.$evalAsync(function() {
-          templateCache = elem.html();
+          scope.templateCache = elem.html();
         });
       }
 
@@ -193,8 +178,8 @@ angular.module('pz101.ztiles')
           row + '" tiles-col="' +
           col + '" tile-type="' +
           type + '" style="float:' +
-          rows[row].float + '">' +
-          transcludeTemplate + '</div>',
+          scope.rows[row].float + '">' +
+          scope.transcludeTemplate + '</div>',
           // create isolated scope for tile. Parent Scope
           // is available via "mother"
           isolatedScope = scope.$new(true),
@@ -209,22 +194,9 @@ angular.module('pz101.ztiles')
 
       function createGrid(parent, tileSet, offset, align) {
         var lowestRatio = 0,
-          n,
-          c,
-          pc,
-          pa,
-          pb,
-          lastTime,
-          i,
-          ra,
-          k,
-          l,
-          rb,
-          row;
+          n, c, pc, pa, pb, lastTime, i, ra, k, l, rb, row;
 
-        // TODO for count 1 and 2
         if (tileSet.length === 1) {
-          //console.log('Not implemented yet! 1');
           c = ratio(tileSet[0]);
           pa = [];
           pb = [];
@@ -244,10 +216,10 @@ angular.module('pz101.ztiles')
             float: align
           };
 
-          rows.push(row);
+          scope.rows.push(row);
 
           // create DOMs for row
-          createRow(tileSet, row, rows.length - 1, parent);
+          createRow(tileSet, row, scope.rows.length - 1, parent);
 
         } else if (tileSet.length === 2) {
           c = ratio(tileSet[0]);
@@ -265,9 +237,9 @@ angular.module('pz101.ztiles')
             float: align
           };
 
-          rows.push(row);
+          scope.rows.push(row);
 
-          createRow(tileSet, row, rows.length - 1, parent);
+          createRow(tileSet, row, scope.rows.length - 1, parent);
 
         } else if (tileSet.length >= 3) {
 
@@ -322,43 +294,40 @@ angular.module('pz101.ztiles')
             float: align
           };
 
-          rows.push(row);
+          scope.rows.push(row);
 
           // create DOMs for row
-          createRow(tileSet, row, rows.length - 1, parent);
+          createRow(tileSet, row, scope.rows.length - 1, parent);
         }
       }
       if (scope.options) {
         if (scope.options.padding) {
-          options.padding = scope.options.padding;
+          scope.defaultOptions.padding = scope.options.padding;
         }
         if (scope.options.widthKey) {
-          options.widthKey = scope.options.widthKey;
+          scope.defaultOptions.widthKey = scope.options.widthKey;
         }
         if (scope.options.heightKey) {
-          options.heightKey = scope.options.heightKey;
+          scope.defaultOptions.heightKey = scope.options.heightKey;
         }
         if (scope.options.alignment) {
-          options.alignment = scope.options.alignment;
+          scope.defaultOptions.alignment = scope.options.alignment;
         }
         if (scope.options.counts && angular.isArray(scope.options.counts)) {
-          options.counts = scope.options.counts;
+          scope.defaultOptions.counts = scope.options.counts;
         }
-      }
-      if (scope.maxTiles) {
-        maxTiles = parseInt(scope.maxTiles);
       }
       // get transclude template
       if (elem.html()) {
-        transcludeTemplate = elem.html();
+        scope.transcludeTemplate = elem.html();
 
         elem.empty();
       }
 
       // use cached template
-      if (templateCache !== null) {
-        elem.append(templateCache);
-        // TODO Template Chach muss neu kompiliert werden..
+      if (scope.templateCache !== null) {
+        elem.append(scope.templateCache);
+        // TODO Template cache has to be recompiled...
       }
 
       $window = angular.element(window);
@@ -373,11 +342,11 @@ angular.module('pz101.ztiles')
         renderCSS();
       });
 
-      if (scope.tiles && templateCache !== null) {
-        tilesCount = scope.tiles.length;
+      if (scope.tiles && scope.templateCache !== null) {
+        scope.tilesCount = scope.tiles.length;
       }
 
-      // watch for changes in cards. Only appending is supported now.
+      // watch for changes in tiles. Only appending is supported now.
       scope.$watch('tiles', function() {
         var done,
           max,
@@ -385,35 +354,31 @@ angular.module('pz101.ztiles')
           rowCount = 0,
           align;
 
-        // add new cards and create DOMs
+        // add new tiles and create DOMs
         if (scope.tiles) {
           if (tileCount() !== scope.tiles.length) {
             done = tileCount();
-            tilesCount = scope.tiles.length;
+            scope.tilesCount = scope.tiles.length;
 
-            while (done < tilesCount) {
-              // max cards
-              max = Math.min(maxTiles, tilesCount - done);
-              // standard value is set to 3
-              //r = Math.min(max, 3);
-              //if (max > 3) {
-              //  r = Math.floor((Math.random() * (max - 3)) + 3);
-              //}
-
+            while (done < scope.tilesCount) {
+              // max tiles
+              max = scope.tilesCount - done;
               // Default Counts [3]: 3, 3, 3, 3...
-              if (countsOffset >= options.counts.length) {
-                countsOffset = 0;
+              if (scope.countsOffset >= scope.defaultOptions.counts.length) {
+                scope.countsOffset = 0;
               }
 
-              r = Math.min(max, options.counts[countsOffset]);
+              r = Math.min(max,
+                scope.defaultOptions.counts[scope.countsOffset]);
 
               // Default Alignments 'lr': left, right, left, right...
-              if (alignOffset >= options.alignment.length) {
-                alignOffset = 0;
+              if (scope.alignOffset >= scope.defaultOptions.alignment.length) {
+                scope.alignOffset = 0;
               }
-              if (options.alignment[alignOffset] === 'l') {
+              if (scope.defaultOptions.alignment[scope.alignOffset] === 'l') {
                 align = 'left';
-              } else if (options.alignment[alignOffset] === 'r') {
+              } else if (
+                  scope.defaultOptions.alignment[scope.alignOffset] === 'r') {
                 align = 'right';
               } else {
                 if (Math.random() >= 0.5) {
@@ -422,8 +387,8 @@ angular.module('pz101.ztiles')
                   align = 'left';
                 }
               }
-              alignOffset++;
-              countsOffset++;
+              scope.alignOffset++;
+              scope.countsOffset++;
 
               createGrid(elem, scope.tiles.slice(done, done + r), done, align);
               done += r;
@@ -441,9 +406,9 @@ angular.module('pz101.ztiles')
       restrict: 'A',
       scope: {
         tiles: '=',
-        maxTiles: '@',
         options: '=?'
       },
+      controller: 'zTilesController',
       link: link
     };
   });

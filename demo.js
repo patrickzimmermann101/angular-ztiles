@@ -46,12 +46,12 @@ angular.module('demoApp', ['pz101.ztiles']).controller('DemoCtrl',
           oneline = element.find('span').height();
           element.find('span').empty();
 
-          while (title.height() > oneline) {
+          /*while (title.height() > oneline) {
 
             titleText = element.find('p').text();
             element.find('p').text(titleText.substring(0,
               titleText.length - 5) + ' ...');
-          }
+          }*/
           element.find('.fadeing').hide();
 
         });

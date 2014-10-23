@@ -31,13 +31,13 @@ angular.module('demoApp', ['pz101.ztiles']).controller('DemoCtrl',
           console.log(e);
         });
 
-  }).directive('fadeing', function($timeout) {
+  }).directive('fadeing', function() {
     return {
       restrict: 'A',
       link: function(scope, element) {
 
         // Cut down to one single line
-        $timeout(function() {
+        scope.$evalAsync(function() {
           var title = element.find('p').append('<span>A</span>'),
             oneline = 0,
             titleText;
@@ -46,15 +46,15 @@ angular.module('demoApp', ['pz101.ztiles']).controller('DemoCtrl',
           oneline = element.find('span').height();
           element.find('span').empty();
 
-          while (title.height() > oneline) {
-
+          while (title.height() > oneline && title.height() !== 0 &&
+            oneline !== 0) {
             titleText = element.find('p').text();
             element.find('p').text(titleText.substring(0,
-              titleText.length - 5) + ' ...');
+              titleText.length - 10) + ' ...');
           }
           element.find('.fadeing').hide();
 
-        }, 100);
+        });
 
         element.bind('mouseenter', function() {
           element.find('.fadeing').show();

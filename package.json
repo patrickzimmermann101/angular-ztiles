@@ -1,6 +1,6 @@
 {
   "name": "angular-ztiles",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "author": "Patrick Zimmermann (patrick@knowhere.guru)",
   "description": "Self adaptive tiles in AngularJS like www.yahoo.com/food.",
   "license": "MIT",

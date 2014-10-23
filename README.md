@@ -10,7 +10,7 @@ Demo Screenshot:
 
 ## Technique
 
-Example of a layout with four tiles in a row. 
+Example of a layout with four tiles in a row.
 
 ![Layout](https://raw.github.com/patrickzimmermann101/angular-ztiles/master/layout.jpg)
 
@@ -40,7 +40,7 @@ The algorithm has two alignment modes `left`and `right`. The arrangement is alwa
 1. You need an array of elements which represents your tiles. Each element need a  width and height key.
 2. Mark your tiles section with the attribute `z-tiles`.
 3. Bind your array to the element. `tiles=[...]`.
-	
+
 	```html
     <div z-tiles tiles="tiles">
 	    <p>Your Tile</p>
@@ -87,7 +87,7 @@ Example for a controller class
 	$scope.click = function(tile) {
 		console.log('Clicked Button: ' + tile.body);
 	};
-	
+
 	$scope.tiles = [{
 		width: 200,
 		height: 200,
@@ -105,6 +105,61 @@ Example for a controller class
 
 ### Options
 
+Options are added by attribute ``options``.
+
+  ```html
+  <div z-tiles tiles="tiles" options="{padding: 10}"></div>
+  ```
+
 #### Padding
 
-tbd
+The margin between each tile.
+
+  ```js
+  {
+    padding: 5 //Default is 4
+  }
+  ```
+
+#### Height and Width Key
+
+Alternative width and height key, which will be used in tiles array.
+
+  ```js
+  {
+    heightKey: 'imageHeight', //Default is 'height'
+    widthKey: 'imageWidth' //Default is 'width'
+  }
+  ```
+
+#### Alignment
+
+You can specify for each row, if there is a left floating, a right floating or a random alignment in row.
+
+  ```js
+  {
+    alignment: 'llrrq' //Default is 'lr'
+  }
+  ```
+``l`` Left alignment
+
+``r`` Right alignment
+
+``other or empty`` Random alignment. Example for fully randomize.
+
+  ```js
+  {
+    alignment: ''
+  }
+  ```
+For more rows than definitions, the definition set will repeat.
+
+#### Tiles per row
+
+Defines the count of tiles per row.
+
+  ```js
+  {
+    counts: [3, 5, 4, 8] // Default is [3]
+  }
+  ```

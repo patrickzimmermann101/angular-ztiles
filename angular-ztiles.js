@@ -15,7 +15,7 @@
 'use strict';
 
 angular.module('pz101.ztiles', []).
-  controller('zTilesController', ['$scope', function($scope) {
+  controller('zTilesController', function($scope, zTilesScope) {
 
     // initialize scope variables
     $scope.rows = [];
@@ -31,7 +31,14 @@ angular.module('pz101.ztiles', []).
       alignment: 'lr',
       counts: [3]
     };
-  }]).
+
+    zTilesScope.$s = $scope;
+
+  }).factory('zTilesScope', function() {
+    return {
+      $s: null
+    };
+  }).
   directive('zTiles', function($compile) {
 
     function link(scope, elem) {
@@ -152,6 +159,7 @@ angular.module('pz101.ztiles', []).
         // Wait for compiling and linking
         scope.$evalAsync(function() {
           scope.templateCache = elem.html();
+          scope.$broadcast('rerender');
         });
       }
 
@@ -396,7 +404,9 @@ angular.module('pz101.ztiles', []).
             }
 
             // recalculate styles
-            renderCSS();
+            scope.$evalAsync(function() {
+              renderCSS();
+            });
           }
         }
       });

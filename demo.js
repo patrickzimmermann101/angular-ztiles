@@ -36,7 +36,6 @@ angular.module('demoApp', ['pz101.ztiles']).controller('DemoCtrl',
         }).error(function(e) {
           console.log(e);
         });
-
   }).directive('fadeing', function() {
     return {
       restrict: 'A',

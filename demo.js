@@ -47,7 +47,7 @@ angular.module('demoApp', ['pz101.ztiles']).controller('DemoCtrl',
 
             var title = element.find('p'),
               oneline = 0,
-              titleText;
+              titleText, lastChange = 0, newText = '';
             title.empty();
             title.text(scope.title);
             title.append('<span>A</span>');
@@ -56,11 +56,15 @@ angular.module('demoApp', ['pz101.ztiles']).controller('DemoCtrl',
             oneline = element.find('span').height();
             element.find('span').empty();
 
-            while (title.height() > oneline) {
-              titleText = element.find('p').text();
-              element.find('p').text(titleText.substring(0,
-                titleText.length - 5) + ' ...');
-            }
+            while (title.height() > oneline && title.height() !== 0 &&
+              oneline !== 0 && (lastChange !== title.height() || (titleText &&
+            titleText.length !== newText.length))) {
+                lastChange = title.height();
+                titleText = element.find('p').text();
+                newText = titleText.substring(0, titleText.length - 5) + ' ...';
+                element.find('p').text(newText);
+              }
+
             element.find('.fadeing').hide();
           });
         }

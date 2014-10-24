@@ -37,42 +37,10 @@ angular.module('demoApp', ['pz101.ztiles']).controller('DemoCtrl',
           console.log(e);
         });
 
-  }).directive('fadeing', function(zTilesScope) {
+  }).directive('fadeing', function() {
     return {
       restrict: 'A',
       link: function(scope, element) {
-        // Cut down to one single line
-        if (zTilesScope.$s) {
-          zTilesScope.$s.$on('rerender', function() {
-
-            var title = element.find('p'),
-              oneline = 0,
-              titleText, lastChange = 0, newText = '';
-            title.empty();
-            title.text(scope.title);
-            title.append('<span>A</span>');
-
-            element.find('.fadeing').show();
-            oneline = element.find('span').height();
-            element.find('span').empty();
-
-            while (title.height() > oneline && title.height() !== 0 &&
-              oneline !== 0 && (lastChange !== title.height() || (titleText &&
-            titleText.length !== newText.length))) {
-                lastChange = title.height();
-                titleText = element.find('p').text();
-                newText = titleText.substring(0, titleText.length - 5) + ' ...';
-                element.find('p').text(newText);
-              }
-
-            element.find('.fadeing').hide();
-          });
-        }
-
-        scope.$evalAsync(function() {
-          scope.title = element.find('p').text();
-        });
-
         element.bind('mouseenter', function() {
           element.find('.fadeing').show();
         });

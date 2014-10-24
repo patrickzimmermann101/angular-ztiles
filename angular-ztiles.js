@@ -15,7 +15,7 @@
 'use strict';
 
 angular.module('pz101.ztiles', []).
-  controller('zTilesController', function($scope, zTilesScope) {
+  controller('zTilesController', function($scope) {
 
     // initialize scope variables
     $scope.rows = [];
@@ -31,18 +31,18 @@ angular.module('pz101.ztiles', []).
       alignment: 'lr',
       counts: [3]
     };
-
-    zTilesScope.$s = $scope;
-
-  }).factory('zTilesScope', function() {
-    return {
-      $s: null
-    };
   }).
   directive('zTiles', function($compile) {
 
     function link(scope, elem) {
       var $window;
+
+      scope.$watch(function() {
+        return elem.width();
+      }, function() {
+        console.log('Watch CSS WIDTH: ' + elem.css('width'));
+        console.log('Watch WIDTH: ' + elem.width());
+      });
 
       // get current created tiles
       function tileCount() {
@@ -66,9 +66,14 @@ angular.module('pz101.ztiles', []).
       function renderCSS() {
 
         var width = elem.width() - 1,
+          cssWidth = parseInt(elem.css('width'), 10) - 1,
           p = scope.defaultOptions.padding,
           r = 0, row, qa, qb, c, ra, rb, hc, hb, ha, wc, elems, n, $e,
           type, indexA, tileA, indexB, tileB;
+
+        if (cssWidth < width) {
+          width = cssWidth;
+        }
 
         elem.find('.z-tile').css('padding', '0px').css('margin', '0px');
 

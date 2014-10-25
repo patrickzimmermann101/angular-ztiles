@@ -341,8 +341,9 @@ angular.module('pz101.ztiles', []).
 
       // use cached template
       if (angular.isDefined(zTilesFactory.templateCache)) {
-        elem.append(scope.templateCache);
+        elem.append(zTilesFactory.templateCache);
         console.log('CACHE IS USED');
+        console.log('ROWS: ' + scope.rows.length);
         // TODO Template cache has to be recompiled...
       }
 

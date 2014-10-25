@@ -18,11 +18,6 @@ angular.module('pz101.ztiles', []).
   controller('zTilesController', function($scope) {
 
     // initialize scope variables
-    //$scope.rows = [];
-    $scope.tilesCount = 0;
-    $scope.alignOffset = 0;
-    $scope.countsOffset = 0;
-    //$scope.templateCache = null;
     $scope.transcludeTemplate = '';
     $scope.defaultOptions = {
       padding: 4,
@@ -33,7 +28,9 @@ angular.module('pz101.ztiles', []).
     };
   }).factory('zTilesFactory', function() {
     return {
-      rows: []
+      rows: [],
+      alignOffset: 0,
+      countsOffset: 0
     };
   }).
   directive('zTiles', function($compile, zTilesFactory) {
@@ -49,7 +46,7 @@ angular.module('pz101.ztiles', []).
       });
 
       // get current created tiles
-      function tileCount() {
+      function getTilesCount() {
         var i,
           num = 0;
 
@@ -364,43 +361,43 @@ angular.module('pz101.ztiles', []).
         renderCSS();
       });
 
-      if (scope.tiles && scope.templateCache !== null) {
-        scope.tilesCount = scope.tiles.length;
-      }
-
       // watch for changes in tiles. Only appending is supported now.
       scope.$watch('tiles', function() {
         var done,
           max,
           r,
           rowCount = 0,
-          align;
+          align, tilesCount;
 
         // add new tiles and create DOMs
         if (scope.tiles) {
-          if (tileCount() !== scope.tiles.length) {
-            done = tileCount();
-            scope.tilesCount = scope.tiles.length;
-
-            while (done < scope.tilesCount) {
+          if (getTilesCount() !== scope.tiles.length) {
+            done = getTilesCount();
+            tilesCount = scope.tiles.length;
+            console.log('ADD ROWS');
+            while (done < tilesCount) {
               // max tiles
-              max = scope.tilesCount - done;
+              max = tilesCount - done;
               // Default Counts [3]: 3, 3, 3, 3...
-              if (scope.countsOffset >= scope.defaultOptions.counts.length) {
-                scope.countsOffset = 0;
+              if (zTilesFactory.countsOffset >=
+                scope.defaultOptions.counts.length) {
+                zTilesFactory.countsOffset = 0;
               }
 
               r = Math.min(max,
-                scope.defaultOptions.counts[scope.countsOffset]);
+                scope.defaultOptions.counts[zTilesFactory.countsOffset]);
 
               // Default Alignments 'lr': left, right, left, right...
-              if (scope.alignOffset >= scope.defaultOptions.alignment.length) {
-                scope.alignOffset = 0;
+              if (zTilesFactory.alignOffset >=
+                scope.defaultOptions.alignment.length) {
+                zTilesFactory.alignOffset = 0;
               }
-              if (scope.defaultOptions.alignment[scope.alignOffset] === 'l') {
+              if (scope.defaultOptions.alignment[zTilesFactory.alignOffset] ===
+                'l') {
                 align = 'left';
               } else if (
-                  scope.defaultOptions.alignment[scope.alignOffset] === 'r') {
+                  scope.defaultOptions.alignment[zTilesFactory.alignOffset] ===
+                  'r') {
                 align = 'right';
               } else {
                 if (Math.random() >= 0.5) {
@@ -409,12 +406,13 @@ angular.module('pz101.ztiles', []).
                   align = 'left';
                 }
               }
-              scope.alignOffset++;
-              scope.countsOffset++;
+              zTilesFactory.alignOffset++;
+              zTilesFactory.countsOffset++;
 
               createGrid(elem, scope.tiles.slice(done, done + r), done, align);
               done += r;
               rowCount++;
+              console.log('ADD ROWS FINISHED');
             }
 
             // recalculate styles

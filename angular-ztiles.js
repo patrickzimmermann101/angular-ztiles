@@ -22,7 +22,7 @@ angular.module('pz101.ztiles', []).
     $scope.tilesCount = 0;
     $scope.alignOffset = 0;
     $scope.countsOffset = 0;
-    $scope.templateCache = null;
+    //$scope.templateCache = null;
     $scope.transcludeTemplate = '';
     $scope.defaultOptions = {
       padding: 4,
@@ -31,8 +31,11 @@ angular.module('pz101.ztiles', []).
       alignment: 'lr',
       counts: [3]
     };
+  }).factory('zTilesFactory', function() {
+    return {
+    };
   }).
-  directive('zTiles', function($compile) {
+  directive('zTiles', function($compile, zTilesFactory) {
 
     function link(scope, elem) {
       var $window;
@@ -163,7 +166,7 @@ angular.module('pz101.ztiles', []).
 
         // Wait for compiling and linking
         scope.$evalAsync(function() {
-          scope.templateCache = elem.html();
+          zTilesFactory.templateCache = elem.html();
           scope.$broadcast('rerender');
         });
       }
@@ -338,8 +341,9 @@ angular.module('pz101.ztiles', []).
       }
 
       // use cached template
-      if (scope.templateCache !== null) {
+      if (angular.isDefined(zTilesFactory.templateCache)) {
         elem.append(scope.templateCache);
+        console.log('CACHE IS USED');
         // TODO Template cache has to be recompiled...
       }
 

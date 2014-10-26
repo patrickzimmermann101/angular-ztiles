@@ -66,7 +66,7 @@ angular.module('pz101.ztiles', []).
       // update all css values
       function renderCSS() {
 
-        var width = elem.width() - 1,
+        var width = elem.innerWidth() - 1,
           cssWidth = parseInt(elem.css('width'), 10) - 1,
           p = scope.defaultOptions.padding,
           r = 0, row, qa, qb, c, ra, rb, hc, hb, ha, wc, elems, n, $e,

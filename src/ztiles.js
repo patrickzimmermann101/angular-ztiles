@@ -32,7 +32,7 @@ angular.module('pz101.ztiles', []).
       countsOffset: 0
     };
   }).
-  directive('zTiles', function($compile, zTilesFactory) {
+  directive('zTiles', function($compile, $timeout, zTilesFactory) {
 
     function link(scope, elem) {
       var $window;
@@ -418,6 +418,10 @@ angular.module('pz101.ztiles', []).
             scope.$evalAsync(function() {
               renderCSS();
             });
+
+            $timeout(function() {
+              renderCSS();
+            }, 100);
           }
         }
       });

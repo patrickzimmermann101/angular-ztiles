@@ -30,7 +30,13 @@ angular.module('pz101.ztiles', []).
     return {
       rows: [],
       alignOffset: 0,
-      countsOffset: 0
+      countsOffset: 0,
+      reset: function() {
+        this.rows = [];
+        this.alignOffset = 0;
+        this.countsOffset = 0;
+        this.templateCache = '';
+      }
     };
   }).
   directive('zTiles', function($compile, $timeout, zTilesFactory) {
@@ -336,7 +342,7 @@ angular.module('pz101.ztiles', []).
       }
 
       // use cached template
-      if (angular.isDefined(zTilesFactory.templateCache)) {
+      if (zTilesFactory.templateCache) {
         elem.append(zTilesFactory.templateCache);
       }
 
@@ -359,6 +365,11 @@ angular.module('pz101.ztiles', []).
           r,
           rowCount = 0,
           align, tilesCount;
+
+        if (scope.tiles.length < getTilesCount()) {
+          zTilesFactory.reset();
+          elem.empty();
+        }
 
         // add new tiles and create DOMs
         if (scope.tiles) {

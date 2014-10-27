@@ -37,13 +37,6 @@ angular.module('pz101.ztiles', []).
     function link(scope, elem) {
       var $window;
 
-      scope.$watch(function() {
-        return elem.width();
-      }, function() {
-        console.log('Watch CSS WIDTH: ' + elem.css('width'));
-        console.log('Watch WIDTH: ' + elem.width());
-      });
-
       // get current created tiles
       function getTilesCount() {
         var i,
@@ -344,8 +337,6 @@ angular.module('pz101.ztiles', []).
       // use cached template
       if (angular.isDefined(zTilesFactory.templateCache)) {
         elem.append(zTilesFactory.templateCache);
-        console.log('CACHE IS USED');
-        console.log('ROWS: ' + zTilesFactory.rows.length);
       }
 
       $window = angular.element(window);
@@ -373,7 +364,6 @@ angular.module('pz101.ztiles', []).
           if (getTilesCount() !== scope.tiles.length) {
             done = getTilesCount();
             tilesCount = scope.tiles.length;
-            console.log('ADD ROWS');
             while (done < tilesCount) {
               // max tiles
               max = tilesCount - done;
@@ -411,7 +401,6 @@ angular.module('pz101.ztiles', []).
               createGrid(elem, scope.tiles.slice(done, done + r), done, align);
               done += r;
               rowCount++;
-              console.log('ADD ROWS FINISHED');
             }
 
             // recalculate styles

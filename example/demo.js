@@ -27,15 +27,20 @@ angular.module('demoApp', ['pz101.ztiles']).controller('DemoCtrl',
           });
 
           $scope.tiles = tiles.map(function(entry) {
-            var lastPoint = entry.link.lastIndexOf('.');
-            entry.thumb = entry.link.substring(0, lastPoint) + 'l' +
-              entry.link.substring(lastPoint, entry.link.length);
+            if (entry.gifv) {
+              entry.thumb = entry.link;
+            } else {
+              var lastPoint = entry.link.lastIndexOf('.');
+              entry.thumb = entry.link.substring(0, lastPoint) + 'l' +
+                entry.link.substring(lastPoint, entry.link.length);
+            }
             return entry;
           });
 
         }).error(function(e) {
           console.log(e);
         });
+
   }).directive('fadeing', function() {
     return {
       restrict: 'A',

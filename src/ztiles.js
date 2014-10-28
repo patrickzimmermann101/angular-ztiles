@@ -30,12 +30,16 @@ angular.module('pz101.ztiles', []).
       rows: [],
       alignOffset: 0,
       countsOffset: 0,
-      cachedTiles: [],
+      cachedScopes: [],
       reset: function() {
         this.rows = [];
         this.alignOffset = 0;
         this.countsOffset = 0;
         this.templateCache = '';
+
+        for (var i = 0; i < this.cachedScopes.length; i++) {
+          this.cachedScopes[i].$destroy();
+        }
       }
     };
   }).
@@ -204,7 +208,7 @@ angular.module('pz101.ztiles', []).
 
         isolatedScope.tile = tile;
         isolatedScope.mother = scope.$parent;
-
+        zTilesFactory.cachedScopes.push(isolatedScope);
         content = $compile(outterdiv)(isolatedScope);
         parent.append(content);
       }

@@ -30,6 +30,7 @@ angular.module('pz101.ztiles', []).
       rows: [],
       alignOffset: 0,
       countsOffset: 0,
+      cachedTiles: [],
       reset: function() {
         this.rows = [];
         this.alignOffset = 0;
@@ -41,7 +42,7 @@ angular.module('pz101.ztiles', []).
   directive('zTiles', function($compile, $timeout, zTilesFactory) {
 
     function link(scope, elem) {
-      var $window;
+      var $window, watcher, onDestroy;
 
       // get current created tiles
       function getTilesCount() {
@@ -342,6 +343,7 @@ angular.module('pz101.ztiles', []).
 
       // use cached template
       if (zTilesFactory.templateCache) {
+        elem.empty();
         elem.append(zTilesFactory.templateCache);
       }
 
@@ -357,21 +359,31 @@ angular.module('pz101.ztiles', []).
         renderCSS();
       });
 
+      onDestroy = scope.$on('$destroy', function() {
+        watcher();
+        onDestroy();
+      });
       // watch for changes in tiles. Only appending is supported now.
-      scope.$watch('tiles', function() {
+      watcher = scope.$watch('tiles', function() {
         var done,
           max,
           r,
           rowCount = 0,
           align, tilesCount;
 
-        if (scope.tiles.length < getTilesCount()) {
+        if (scope.tiles.length > 0 &&
+          scope.tiles.length < getTilesCount()) {
           zTilesFactory.reset();
+          elem.empty();
+        }
+
+        if (getTilesCount() === 0 && scope.tiles.length === 0) {
           elem.empty();
         }
 
         // add new tiles and create DOMs
         if (scope.tiles) {
+
           if (getTilesCount() !== scope.tiles.length) {
             done = getTilesCount();
             tilesCount = scope.tiles.length;

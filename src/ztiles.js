@@ -31,6 +31,7 @@ angular.module('pz101.ztiles', []).
       alignOffset: 0,
       countsOffset: 0,
       cachedScopes: [],
+
       reset: function() {
         this.rows = [];
         this.alignOffset = 0;
@@ -46,7 +47,7 @@ angular.module('pz101.ztiles', []).
   directive('zTiles', function($compile, $timeout, zTilesFactory) {
 
     function link(scope, elem) {
-      var $window, watcher, onDestroy;
+      var $window, watcher, onDestroy, onRerender;
 
       // get current created tiles
       function getTilesCount() {
@@ -172,7 +173,6 @@ angular.module('pz101.ztiles', []).
         // Wait for compiling and linking
         scope.$evalAsync(function() {
           zTilesFactory.templateCache = elem.html();
-          scope.$broadcast('rerender');
         });
       }
 
@@ -349,6 +349,7 @@ angular.module('pz101.ztiles', []).
       if (zTilesFactory.templateCache) {
         elem.empty();
         elem.append(zTilesFactory.templateCache);
+        console.log('USE CAHCE');
       }
 
       $window = angular.element(window);
@@ -366,6 +367,11 @@ angular.module('pz101.ztiles', []).
       onDestroy = scope.$on('$destroy', function() {
         watcher();
         onDestroy();
+        onRerender();
+      });
+
+      onRerender = scope.$on('ztiles-rerender', function() {
+        renderCSS();
       });
       // watch for changes in tiles. Only appending is supported now.
       watcher = scope.$watch('tiles', function() {

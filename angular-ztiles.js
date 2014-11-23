@@ -380,7 +380,10 @@ angular.module('pz101.ztiles', []).
           max,
           r,
           rowCount = 0,
-          align, tilesCount;
+          align,
+          tilesCount,
+          slice,
+          l;
 
         if (scope.tiles.length > 0 &&
           scope.tiles.length < getTilesCount()) {
@@ -431,6 +434,20 @@ angular.module('pz101.ztiles', []).
               }
               zTilesFactory.alignOffset++;
               zTilesFactory.countsOffset++;
+
+              // If panorama ratio force to one in a row.
+              slice = scope.tiles.slice(done, done + r);
+              for (l = 0; l < slice.length; l++) {
+                if (slice[l].ratio >= 2) {
+                  if (l === 0) {
+                    r = l + 1;
+                  } else {
+                    r = l;
+                  }
+                  zTilesFactory.countsOffset = 0;
+                  break;
+                }
+              }
 
               createGrid(elem, scope.tiles.slice(done, done + r), done, align);
               done += r;

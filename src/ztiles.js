@@ -23,8 +23,12 @@ angular.module('pz101.ztiles', []).
       heightKey: 'height',
       widthKey: 'width',
       alignment: 'lr',
-      counts: [3]
+      counts: [3],
+      rowMode: 'simple'
     };
+    $scope.tilesCache = [];
+    $scope.drawnTiles = [];
+
   }).factory('zTilesFactory', function() {
     return {
       rows: [],
@@ -148,7 +152,7 @@ angular.module('pz101.ztiles', []).
 
                 indexA = (row.offset +
                   row.pa[$e.attr('tiles-col')]);
-                tileA = scope.tiles[indexA];
+                tileA = scope.drawnTiles[indexA];
                 $e.css('height', ha + 'px').
                   css('width', ratio(tileA) * ha + 'px').
                   css('margin-' + row.float, p + 'px');
@@ -158,7 +162,7 @@ angular.module('pz101.ztiles', []).
 
                 indexB = (row.offset +
                   row.pb[$e.attr('tiles-col')]);
-                tileB = scope.tiles[indexB];
+                tileB = scope.drawnTiles[indexB];
                 $e.
                   css('width', ratio(tileB) * hb + 'px').
                   css('margin-top', p + 'px').
@@ -216,6 +220,9 @@ angular.module('pz101.ztiles', []).
       function createGrid(parent, tileSet, offset, align) {
         var lowestRatio = 0,
           n, c, pc, pa, pb, lastTime, i, ra, k, l, rb, row;
+
+        offset = scope.drawnTiles.length;
+        scope.drawnTiles = scope.drawnTiles.concat(angular.copy(tileSet));
 
         if (tileSet.length === 1) {
           c = ratio(tileSet[0]);
@@ -337,6 +344,9 @@ angular.module('pz101.ztiles', []).
         if (scope.options.counts && angular.isArray(scope.options.counts)) {
           scope.defaultOptions.counts = scope.options.counts;
         }
+        if (scope.options.rowMode) {
+          scope.defaultOptions.rowMode = scope.options.rowMode;
+        }
       }
       // get transclude template
       if (elem.html()) {
@@ -349,7 +359,6 @@ angular.module('pz101.ztiles', []).
       if (zTilesFactory.templateCache) {
         elem.empty();
         elem.append(zTilesFactory.templateCache);
-        console.log('USE CAHCE');
       }
 
       $window = angular.element(window);
@@ -377,32 +386,42 @@ angular.module('pz101.ztiles', []).
       watcher = scope.$watch('tiles', function() {
         var done,
           max,
+          maxCache,
           r,
           rowCount = 0,
           align,
           tilesCount,
           slice,
-          l;
+          l,
+          i,
+          tilesToCreate,
+          oldOffset;
 
-        if (scope.tiles.length > 0 &&
+        if (scope.tiles && scope.tiles.length > 0 &&
           scope.tiles.length < getTilesCount()) {
           zTilesFactory.reset();
           elem.empty();
         }
 
-        if (getTilesCount() === 0 && scope.tiles.length === 0) {
+        if (getTilesCount() === 0 &&
+          (scope.tiles && scope.tiles.length === 0) || !scope.tiles) {
           elem.empty();
         }
 
         // add new tiles and create DOMs
         if (scope.tiles) {
 
-          if (getTilesCount() !== scope.tiles.length) {
+          if (getTilesCount() !== scope.tiles.length +
+            scope.tilesCache.length) {
+
             done = getTilesCount();
-            tilesCount = scope.tiles.length;
+            tilesCount = scope.tiles.length + scope.tilesCache.length;
             while (done < tilesCount) {
-              // max tiles
+
+              // max tiles possible
               max = tilesCount - done;
+              oldOffset = done;
+
               // Default Counts [3]: 3, 3, 3, 3...
               if (zTilesFactory.countsOffset >=
                 scope.defaultOptions.counts.length) {
@@ -411,6 +430,62 @@ angular.module('pz101.ztiles', []).
 
               r = Math.min(max,
                 scope.defaultOptions.counts[zTilesFactory.countsOffset]);
+
+              if (scope.tilesCache.length > 0) {
+                maxCache = Math.min(scope.tilesCache.length, r);
+                r -= maxCache;
+                tilesToCreate = scope.tilesCache.slice(0, maxCache);
+                scope.tilesCache = scope.tilesCache.slice(maxCache,
+                  scope.tilesCache.length);
+              } else {
+                tilesToCreate = [];
+              }
+              tilesToCreate =
+                scope.tiles.slice(done, done + r).concat(tilesToCreate);
+              done += r;
+
+              if (scope.defaultOptions.rowMode === 'intelligent') {
+
+                if (ratio(tilesToCreate[0]) >= 2) {
+                  scope.tilesCache = scope.tilesCache.concat(
+                    tilesToCreate.slice(1, tilesToCreate.length)
+                  );
+                  tilesToCreate = [tilesToCreate[0]];
+                } else {
+
+                  for (i = 0; i < tilesToCreate.length; i++) {
+                    if (ratio(tilesToCreate[i]) >= 2) {
+                      scope.tilesCache = scope.tilesCache.concat(
+                        tilesToCreate.slice(i, tilesToCreate.length)
+                      );
+
+                      tilesToCreate = tilesToCreate.slice(0, i);
+                      break;
+                    }
+                  }
+                }
+
+                if (tilesToCreate.length === 1 &&
+                  ratio(tilesToCreate[0]) < 2) {
+                  scope.tilesCache.push(tilesToCreate[0]);
+                  tilesToCreate = [];
+                }
+              } else if (scope.defaultOptions.rowMode === 'panorama') {
+
+                // If panorama ratio force to one in a row.
+                slice = scope.tiles.slice(done, done + r);
+                for (l = 0; l < slice.length; l++) {
+                  if (ratio(slice[l]) >= 2) {
+                    if (l === 0) {
+                      r = l + 1;
+                    } else {
+                      r = l;
+                    }
+                    zTilesFactory.countsOffset = 0;
+                    break;
+                  }
+                }
+              }
 
               // Default Alignments 'lr': left, right, left, right...
               if (zTilesFactory.alignOffset >=
@@ -431,26 +506,13 @@ angular.module('pz101.ztiles', []).
                   align = 'left';
                 }
               }
-              zTilesFactory.alignOffset++;
-              zTilesFactory.countsOffset++;
 
-              // If panorama ratio force to one in a row.
-              slice = scope.tiles.slice(done, done + r);
-              for (l = 0; l < slice.length; l++) {
-                if (slice[l].ratio >= 2) {
-                  if (l === 0) {
-                    r = l + 1;
-                  } else {
-                    r = l;
-                  }
-                  zTilesFactory.countsOffset = 0;
-                  break;
-                }
+              if (tilesToCreate.length > 0) {
+                createGrid(elem, tilesToCreate, oldOffset, align);
+                rowCount++;
+                zTilesFactory.alignOffset++;
+                zTilesFactory.countsOffset++;
               }
-
-              createGrid(elem, scope.tiles.slice(done, done + r), done, align);
-              done += r;
-              rowCount++;
             }
 
             // recalculate styles

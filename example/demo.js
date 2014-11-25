@@ -23,7 +23,7 @@ angular.module('demoApp', ['pz101.ztiles']).controller('DemoCtrl',
 
           tiles = data.items.filter(function(entry) {
             i++;
-            return angular.isDefined(entry.width) && i < 50 && i > 10;
+            return angular.isDefined(entry.width) && i < 100 && i > 11;
           });
 
           $scope.tiles = tiles.map(function(entry) {

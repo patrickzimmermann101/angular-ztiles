@@ -30,7 +30,7 @@ angular.module('pz101.ztiles', []).
 
   }).factory('zTilesFactory', function() {
     return {
-      rows: [],
+      /*rows: [],
       alignOffset: 0,
       countsOffset: 0,
       cachedScopes: [],
@@ -50,21 +50,59 @@ angular.module('pz101.ztiles', []).
         for (var i = 0; i < this.cachedScopes.length; i++) {
           this.cachedScopes[i].$destroy();
         }
+      },
+      */
+      cache: {preset: {
+        rows: [],
+        alignOffset: 0,
+        countsOffset: 0,
+        cachedScopes: [],
+        tilesCache: [],
+        drawnTiles: [],
+        tilesDone: 0
+      }},
+
+      getCache: function(id) {
+        if (!id) {
+          id = 'default';
+        }
+
+        if (!this.cache.hasOwnProperty(id)) {
+          this.cache[id] = angular.copy(this.cache.preset);
+        }
+
+        return this.cache[id];
+      },
+
+      resetCache: function(id) {
+        if (!id) {
+          id = 'default';
+        }
+
+        var c = this.getCache(id), i;
+
+        for (i = 0; i < c.cachedScopes.length; i++) {
+          c.cachedScopes[i].$destroy();
+        }
+
+        delete this.cache[id];
+        console.log('reset cache', id);
       }
     };
   }).
   directive('zTiles', function($compile, $timeout, zTilesFactory) {
 
     function link(scope, elem) {
-      var $window, watcher, onDestroy, onRerender;
+      var $window, watcher, onDestroy, onRerender,
+        cache = zTilesFactory.getCache(elem.attr('id'));
 
       // get current created tiles
       function getTilesCount() {
         var i,
           num = 0;
 
-        for (i = 0;i < zTilesFactory.rows.length; i++) {
-          num += zTilesFactory.rows[i].na + zTilesFactory.rows[i].nb + 1;
+        for (i = 0;i < cache.rows.length; i++) {
+          num += cache.rows[i].na + cache.rows[i].nb + 1;
         }
 
         return num;
@@ -91,25 +129,25 @@ angular.module('pz101.ztiles', []).
 
         elem.find('.z-tile').css('padding', '0px').css('margin', '0px');
 
-        for (r = 0; r < zTilesFactory.rows.length; r++) {
+        for (r = 0; r < cache.rows.length; r++) {
 
-          if (zTilesFactory.rows[r].na === 0 &&
-            zTilesFactory.rows[r].nb === 0) {
+          if (cache.rows[r].na === 0 &&
+            cache.rows[r].nb === 0) {
             // 1 element in row:
             elems = elem.find('.z-tiles-row-' + r);
             for (n = 0;n < elems.length;n++) {
-              hc = (width + 1) / zTilesFactory.rows[r].c;
+              hc = (width + 1) / cache.rows[r].c;
               $e = angular.element(elems[n]);
               $e.css('height', hc + 'px').css('width', (width + 1) + 'px').
                 css('margin-bottom', p + 'px');
             }
-          } else if (zTilesFactory.rows[r].na === 1 &&
-            zTilesFactory.rows[r].nb === 0) {
+          } else if (cache.rows[r].na === 1 &&
+            cache.rows[r].nb === 0) {
             // 2 elements in row:
             hc = (width - scope.defaultOptions.padding) /
-              (zTilesFactory.rows[r].c +
-              zTilesFactory.rows[r].ra);
-            wc = (hc * zTilesFactory.rows[r].c);
+              (cache.rows[r].c +
+              cache.rows[r].ra);
+            wc = (hc * cache.rows[r].c);
 
             elems = elem.find('.z-tiles-row-' + r);
             for (n = 0;n < elems.length;n++) {
@@ -122,14 +160,14 @@ angular.module('pz101.ztiles', []).
 
               } else if (type === 'a') {
                 $e.css('height', hc + 'px').css('width',
-                  zTilesFactory.rows[r].ra *
+                  cache.rows[r].ra *
                   hc + 'px').css('margin-bottom', p + 'px').
-                  css('margin-' + zTilesFactory.rows[r].float, p + 'px');
+                  css('margin-' + cache.rows[r].float, p + 'px');
               }
             }
           } else {
             // 3 and more elements in row
-            row = zTilesFactory.rows[r];
+            row = cache.rows[r];
             qa = (row.na - 1) * p;
             qb = (row.nb - 1) * p;
             c = row.c;
@@ -157,7 +195,7 @@ angular.module('pz101.ztiles', []).
 
                 indexA = (row.offset +
                   row.pa[$e.attr('tiles-col')]);
-                tileA = zTilesFactory.drawnTiles[indexA];
+                tileA = cache.drawnTiles[indexA];
                 $e.css('height', ha + 'px').
                   css('width', ratio(tileA) * ha + 'px').
                   css('margin-' + row.float, p + 'px');
@@ -167,7 +205,7 @@ angular.module('pz101.ztiles', []).
 
                 indexB = (row.offset +
                   row.pb[$e.attr('tiles-col')]);
-                tileB = zTilesFactory.drawnTiles[indexB];
+                tileB = cache.drawnTiles[indexB];
                 $e.
                   css('width', ratio(tileB) * hb + 'px').
                   css('margin-top', p + 'px').
@@ -181,7 +219,7 @@ angular.module('pz101.ztiles', []).
 
         // Wait for compiling and linking
         scope.$evalAsync(function() {
-          zTilesFactory.templateCache = elem.html();
+          cache.templateCache = elem.html();
         });
       }
 
@@ -208,7 +246,7 @@ angular.module('pz101.ztiles', []).
           row + '" tiles-col="' +
           col + '" tile-type="' +
           type + '" style="float:' +
-          zTilesFactory.rows[row].float + '">' +
+          cache.rows[row].float + '">' +
           scope.transcludeTemplate + '</div>',
           // create isolated scope for tile. Parent Scope
           // is available via "mother"
@@ -217,7 +255,7 @@ angular.module('pz101.ztiles', []).
 
         isolatedScope.tile = tile;
         isolatedScope.mother = scope.$parent;
-        zTilesFactory.cachedScopes.push(isolatedScope);
+        cache.cachedScopes.push(isolatedScope);
         content = $compile(outterdiv)(isolatedScope);
         parent.append(content);
       }
@@ -226,9 +264,9 @@ angular.module('pz101.ztiles', []).
         var lowestRatio = 0,
           n, c, pc, pa, pb, lastTime, i, ra, k, l, rb, row;
 
-        offset = zTilesFactory.drawnTiles.length;
-        zTilesFactory.drawnTiles =
-          zTilesFactory.drawnTiles.concat(angular.copy(tileSet));
+        offset = cache.drawnTiles.length;
+        cache.drawnTiles =
+          cache.drawnTiles.concat(angular.copy(tileSet));
 
         if (tileSet.length === 1) {
           c = ratio(tileSet[0]);
@@ -250,10 +288,10 @@ angular.module('pz101.ztiles', []).
             float: align
           };
 
-          zTilesFactory.rows.push(row);
+          cache.rows.push(row);
 
           // create DOMs for row
-          createRow(tileSet, row, zTilesFactory.rows.length - 1, parent);
+          createRow(tileSet, row, cache.rows.length - 1, parent);
 
         } else if (tileSet.length === 2) {
           c = ratio(tileSet[0]);
@@ -271,9 +309,9 @@ angular.module('pz101.ztiles', []).
             float: align
           };
 
-          zTilesFactory.rows.push(row);
+          cache.rows.push(row);
 
-          createRow(tileSet, row, zTilesFactory.rows.length - 1, parent);
+          createRow(tileSet, row, cache.rows.length - 1, parent);
 
         } else if (tileSet.length >= 3) {
 
@@ -328,10 +366,10 @@ angular.module('pz101.ztiles', []).
             float: align
           };
 
-          zTilesFactory.rows.push(row);
+          cache.rows.push(row);
 
           // create DOMs for row
-          createRow(tileSet, row, zTilesFactory.rows.length - 1, parent);
+          createRow(tileSet, row, cache.rows.length - 1, parent);
         }
       }
       if (scope.options) {
@@ -362,9 +400,9 @@ angular.module('pz101.ztiles', []).
       }
 
       // use cached template
-      if (zTilesFactory.templateCache) {
+      if (cache.templateCache) {
         elem.empty();
-        elem.append(zTilesFactory.templateCache);
+        elem.append(cache.templateCache);
       }
 
       $window = angular.element(window);
@@ -404,7 +442,8 @@ angular.module('pz101.ztiles', []).
 
         if (scope.tiles && scope.tiles.length > 0 &&
           scope.tiles.length < getTilesCount()) {
-          zTilesFactory.reset();
+          zTilesFactory.resetCache(elem.attr('id'));
+          cache = zTilesFactory.getCache(elem.attr('id'));
           elem.empty();
         }
 
@@ -417,44 +456,44 @@ angular.module('pz101.ztiles', []).
         if (scope.tiles) {
           console.log(scope.tiles.length);
           if (getTilesCount() !== scope.tiles.length) {
-            console.log('ZTiles: ' + zTilesFactory.tilesDone);
+            console.log('ZTiles: ' + cache.tilesDone);
             tilesCount = scope.tiles.length;
-            while (zTilesFactory.tilesDone < tilesCount) {
+            while (cache.tilesDone < tilesCount) {
 
               // max tiles possible
-              max = tilesCount - zTilesFactory.tilesDone;
+              max = tilesCount - cache.tilesDone;
 
               // Default Counts [3]: 3, 3, 3, 3...
-              if (zTilesFactory.countsOffset >=
+              if (cache.countsOffset >=
                 scope.defaultOptions.counts.length) {
-                zTilesFactory.countsOffset = 0;
+                cache.countsOffset = 0;
               }
 
               r = Math.min(max,
-                scope.defaultOptions.counts[zTilesFactory.countsOffset]);
+                scope.defaultOptions.counts[cache.countsOffset]);
 
-              if (zTilesFactory.tilesCache.length > 0) {
-                maxCache = Math.min(zTilesFactory.tilesCache.length, r);
+              if (cache.tilesCache.length > 0) {
+                maxCache = Math.min(cache.tilesCache.length, r);
                 r -= maxCache;
                 tilesToCreate =
-                  zTilesFactory.tilesCache.slice(0, maxCache);
-                zTilesFactory.tilesCache =
-                  zTilesFactory.tilesCache.slice(maxCache,
-                  zTilesFactory.tilesCache.length);
+                  cache.tilesCache.slice(0, maxCache);
+                cache.tilesCache =
+                  cache.tilesCache.slice(maxCache,
+                  cache.tilesCache.length);
               } else {
                 tilesToCreate = [];
               }
               if (r <= 0) r = 1;
               tilesToCreate =
-                scope.tiles.slice(zTilesFactory.tilesDone,
-                zTilesFactory.tilesDone + r).concat(tilesToCreate);
-              zTilesFactory.tilesDone += r;
+                scope.tiles.slice(cache.tilesDone,
+                cache.tilesDone + r).concat(tilesToCreate);
+              cache.tilesDone += r;
 
               if (scope.defaultOptions.rowMode === 'intelligent') {
 
                 if (ratio(tilesToCreate[0]) >= 2) {
                   console.log('Panorama found on first');
-                  zTilesFactory.tilesCache = zTilesFactory.tilesCache.concat(
+                  cache.tilesCache = cache.tilesCache.concat(
                     tilesToCreate.slice(1, tilesToCreate.length)
                   );
                   tilesToCreate = [tilesToCreate[0]];
@@ -463,9 +502,9 @@ angular.module('pz101.ztiles', []).
                   for (i = 0; i < tilesToCreate.length; i++) {
                     if (ratio(tilesToCreate[i]) >= 2) {
                       console.log('Panorama found on ' + i);
-                      zTilesFactory.tilesCache =
-                        zTilesFactory.tilesCache.concat(
-                        tilesToCreate.slice(i, tilesToCreate.length));
+                      cache.tilesCache =
+                        cache.tilesCache.concat(
+                        cache.slice(i, tilesToCreate.length));
 
                       tilesToCreate = tilesToCreate.slice(0, i);
                       break;
@@ -475,7 +514,7 @@ angular.module('pz101.ztiles', []).
 
                 if (tilesToCreate.length === 1 &&
                   ratio(tilesToCreate[0]) < 2) {
-                  zTilesFactory.tilesCache.push(tilesToCreate[0]);
+                  cache.tilesCache.push(tilesToCreate[0]);
                   tilesToCreate = [];
                 }
               } else if (scope.defaultOptions.rowMode === 'panorama') {
@@ -489,22 +528,22 @@ angular.module('pz101.ztiles', []).
                     } else {
                       r = l;
                     }
-                    zTilesFactory.countsOffset = 0;
+                    cache.countsOffset = 0;
                     break;
                   }
                 }
               }
 
               // Default Alignments 'lr': left, right, left, right...
-              if (zTilesFactory.alignOffset >=
+              if (cache.alignOffset >=
                 scope.defaultOptions.alignment.length) {
-                zTilesFactory.alignOffset = 0;
+                cache.alignOffset = 0;
               }
-              if (scope.defaultOptions.alignment[zTilesFactory.alignOffset] ===
+              if (scope.defaultOptions.alignment[cache.alignOffset] ===
                 'l') {
                 align = 'left';
               } else if (
-                  scope.defaultOptions.alignment[zTilesFactory.alignOffset] ===
+                  scope.defaultOptions.alignment[cache.alignOffset] ===
                   'r') {
                 align = 'right';
               } else {
@@ -518,8 +557,8 @@ angular.module('pz101.ztiles', []).
               if (tilesToCreate.length > 0) {
                 createGrid(elem, tilesToCreate, 0, align);
                 rowCount++;
-                zTilesFactory.alignOffset++;
-                zTilesFactory.countsOffset++;
+                cache.alignOffset++;
+                cache.countsOffset++;
               }
             }
 

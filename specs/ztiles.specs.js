@@ -116,9 +116,11 @@ describe('z-tiles directive', function() {
 
     it('should have 1 element in first row', function() {
       var $row1;
+      console.log('LAST TEST');
       $scope.tiles = [{width: 100, height: 200, body: 'tile1'}];
       $scope.$digest();
       $row1 = $elem.find('.z-tiles-row-0');
+      console.log('HTML', $elem.html());
       expect($row1.length).toBe(1);
     });
   });

@@ -24,33 +24,12 @@ angular.module('pz101.ztiles', []).
       widthKey: 'width',
       alignment: 'lr',
       counts: [3],
-      rowMode: 'simple'
+      rowMode: 'simple',
+      order: 'default'
     };
 
   }).factory('zTilesFactory', function() {
     return {
-      /*rows: [],
-      alignOffset: 0,
-      countsOffset: 0,
-      cachedScopes: [],
-      tilesCache: [],
-      drawnTiles: [],
-      tilesDone: 0,
-
-      reset: function() {
-        this.rows = [];
-        this.alignOffset = 0;
-        this.countsOffset = 0;
-        this.templateCache = '';
-        this.tilesCache = [];
-        this.drawnTiles = [];
-        this.tilesDone = 0;
-
-        for (var i = 0; i < this.cachedScopes.length; i++) {
-          this.cachedScopes[i].$destroy();
-        }
-      },
-      */
       cache: {preset: {
         rows: [],
         alignOffset: 0,
@@ -314,10 +293,15 @@ angular.module('pz101.ztiles', []).
 
         } else if (tileSet.length >= 3) {
 
-          for (n = 0; n < tileSet.length; n++) {
-            if (ratio(tileSet[n]) < ratio(tileSet[lowestRatio])) {
-              lowestRatio = n;
+          /* dont change order */
+          if (scope.defaultOptions.order === 'default') {
+            for (n = 0; n < tileSet.length; n++) {
+              if (ratio(tileSet[n]) < ratio(tileSet[lowestRatio])) {
+                lowestRatio = n;
+              }
             }
+          } else {
+            lowestRatio = 0;
           }
 
           c = ratio(tileSet[lowestRatio]);
@@ -389,6 +373,9 @@ angular.module('pz101.ztiles', []).
         }
         if (scope.options.rowMode) {
           scope.defaultOptions.rowMode = scope.options.rowMode;
+        }
+        if (scope.options.order) {
+          scope.defaultOptions.order = scope.options.order;
         }
       }
       // get transclude template

@@ -448,6 +448,8 @@ angular.module('pz101.ztiles', []).
 
         if (getTilesCount() === 0 &&
           (scope.tiles && scope.tiles.length === 0) || !scope.tiles) {
+          zTilesFactory.resetCache(elem.attr('id'));
+          cache = zTilesFactory.getCache(elem.attr('id'));
           elem.empty();
         }
 

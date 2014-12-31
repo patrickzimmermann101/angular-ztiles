@@ -8,7 +8,7 @@
     "type": "git",
     "url": "git@github.com:patrickzimmermann101/angular-ztiles.git"
   },
-  "main": "./angular-ztiles.js",
+  "main": "./angular-ztiles.min.js",
   "ignore": [
     "**/.*",
     "node_modules",

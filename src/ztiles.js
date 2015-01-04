@@ -36,6 +36,7 @@ angular.module('pz101.ztiles', []).
         countsOffset: 0,
         cachedScopes: [],
         tilesCache: [],
+        tilesHtmlCache: [],
         drawnTiles: [],
         tilesDone: 0
       }},
@@ -203,7 +204,7 @@ angular.module('pz101.ztiles', []).
 
       function createRow(tileSet, row, num, parent) {
 
-        var a, b;
+        var a, b, html;
 
         createDOM('c', num, 0, tileSet[row.pc], parent);
 
@@ -215,7 +216,9 @@ angular.module('pz101.ztiles', []).
           createDOM('b', num, b, tileSet[parseInt(row.pb[b], 10)], parent);
         }
 
-        parent.append('<div class="z-tiles-clear" style="clear:both" />');
+        html = '<div class="z-tiles-clear" style="clear:both" />';
+        parent.append(html);
+        cache.tilesHtmlCache.push({cache: html, compile: false});
       }
 
       function createDOM(type, row, col, tile, parent) {
@@ -236,6 +239,8 @@ angular.module('pz101.ztiles', []).
         cache.cachedScopes.push(isolatedScope);
         content = $compile(outterdiv)(isolatedScope);
         parent.append(content);
+        cache.tilesHtmlCache.push({cache: content, compile: true,
+        scopeIndex: cache.cachedScopes.length});
       }
 
       function createGrid(parent, tileSet, offset, align) {
@@ -388,7 +393,14 @@ angular.module('pz101.ztiles', []).
       // use cached template
       if (cache.templateCache) {
         elem.empty();
-        elem.append(cache.templateCache);
+        /*$compile(template)(scope);
+                    element.append(content);*/
+        //elem.append(cache.templateCache);
+        cache.tilesHtmlCache.forEach(function(htmlCache) {
+          var compiled = $compile(htmlCache.cache)
+            (cache.cachedScopes[htmlCache.scopeIndex]);
+          elem.append(compiled);
+        });
       }
 
       $window = angular.element(window);

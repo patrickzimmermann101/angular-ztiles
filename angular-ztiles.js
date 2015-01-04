@@ -398,9 +398,13 @@ angular.module('pz101.ztiles', []).
                     element.append(content);*/
         //elem.append(cache.templateCache);
         cache.tilesHtmlCache.forEach(function(htmlCache) {
-          var compiled = $compile(htmlCache.cache)
-            (cache.cachedScopes[htmlCache.scopeIndex]);
-          elem.append(compiled);
+          if (htmlCache.compile) {
+            var compiled = $compile(htmlCache.cache)
+              (cache.cachedScopes[htmlCache.scopeIndex - 1]);
+            elem.append(compiled);
+          } else {
+            elem.append(htmlCache.cache);
+          }
         });
       }
 

@@ -442,7 +442,7 @@ angular.module('pz101.ztiles', []).
           i,
           tilesToCreate;
 
-        if (scope.tiles && scope.tiles.length > 0 &&
+        if (scope.tiles && scope.tiles.length >= 0 &&
           scope.tiles.length < getTilesCount()) {
           zTilesFactory.resetCache(elem.attr('id'));
           cache = zTilesFactory.getCache(elem.attr('id'));
